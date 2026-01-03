@@ -407,7 +407,10 @@ func _handle_command(json: Dictionary) -> void:
 			roominfo.emit(conn, json)
 			SignalChooser.new().register_multiple(
 				[all_datapacks_loaded, disconnected],
-				[send_command.bind("Connect",args), Util.nil])
+				[func():
+					send_command.bind("Connect",args)
+					conn._load_locations(),
+					Util.nil])
 			_send_datapack_request()
 		"ConnectionRefused":
 			var err_str := str(json["errors"])
@@ -599,7 +602,7 @@ static func get_datacache(game: String) -> DataCache:
 #region ITEMS
 func _receive_item(index: int, item: NetworkItem) -> bool:
 	assert(item.dest_player_id == conn.player_id)
-	if conn.received_index(index):
+	if conn._received_index(index):
 		return false # Already recieved, skip
 	var data: DataCache = conn.get_gamedata_for_player(conn.player_id)
 	var msg := ""

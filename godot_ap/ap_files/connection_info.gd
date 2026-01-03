@@ -2,39 +2,50 @@ class_name ConnectionInfo
 
 # Variables / data
 
-var serv_version: Version
-var gen_version: Version
-var seed_name: String
+var serv_version: Version ## The server's Archipelago version
+var gen_version: Version ## The generator's Archipelago version
+var seed_name: String ## The seed_name received from the server
 
-var player_id: int
-var team_id: int
-var slot_data: Dictionary
+var player_id: int ## The ID of your player
+var team_id: int ## The ID of your team (unimplemented)
+var slot_data: Dictionary ## The slot_data from the server
 
-var players: Array[NetworkPlayer]
-var slots: Array[NetworkSlot]
+var players: Array[NetworkPlayer] ## The players in this Multiworld
+var slots: Array[NetworkSlot] ## The slots in this Multiworld
 
+## The checked status of the locations for this slot, by location ID.
 var slot_locations: Dictionary[int, bool] = {}
+
+## The NetworkItems received from the server, in index order.
 var received_items: Array[NetworkItem] = []
+
+## The hints for this slot. Only updated if [set_hint_notify] has been used.
 var hints: Array[NetworkHint] = []
+
+## Fires after `locations` and `locs_by_name` have been populated
 signal locations_loaded
 
+## All locations, by ID
 var locations: Dictionary[int, APLocation] = {}
+## All locations, by name
 var locs_by_name: Dictionary[String, APLocation] = {}
 
 # Init / Getters
 
-func received_index(index: int) -> bool:
+func _received_index(index: int) -> bool:
 	return received_items.size() > index and received_items[index] != null
 
 func _to_string():
 	return "AP_CONN(SERV_%s, GEN_%s, SEED:%s, PLYR %d, TEAM %d, SLOT_DATA %s)" % [serv_version,gen_version,seed_name,player_id,team_id,slot_data]
 
 ## Returns a NetworkPlayer for the given ID (or the current slot)
-func get_player(id: int = -1) -> NetworkPlayer: ## TODO handle Team
+## TODO: Handle teams
+func get_player(id: int = -1) -> NetworkPlayer:
 	if id < 0: return players[player_id-1]
 	return players[id-1]
 ## Returns a NetworkSlot for the given ID (or the current slot)
-func get_slot(id: int = -1) -> NetworkSlot: ## TODO handle Team
+## TODO: Handle teams
+func get_slot(id: int = -1) -> NetworkSlot:
 	if id < 0: return slots[player_id-1]
 	return slots[id-1]
 ## Returns a player's name for the given ID (or the current slot)
@@ -53,10 +64,13 @@ func get_gamedata_for_player(plyr_id: int = -1) -> DataCache:
 ## Returns the APLocation (name + id + current hint status) for the given location ID
 func get_location(locid: int) -> APLocation:
 	return locations.get(locid, APLocation.nil())
+## Returns the APLocation (name + id + current hint status) for the given location name
 func get_loc_by_name(loc_name: String) -> APLocation:
 	return locs_by_name.get(loc_name, APLocation.nil())
 
-func load_locations() -> void:
+## Loads (or reloads) all locations from the datapackage.
+## Emits the `locations_loaded` signal when complete.
+func _load_locations() -> void:
 	locations.clear()
 	locs_by_name.clear()
 	if Archipelago.datapack_pending:
@@ -83,7 +97,7 @@ signal all_scout_cached ## Emitted when a scout packet containing ALL locations 
 # Outgoing server packets
 var _notified_keys: Dictionary[String, bool] = {}
 var _hint_listening: bool = false
-func install_hint_listener() -> void:
+func _install_hint_listener() -> void:
 	if _hint_listening: return
 	_hint_listening = true
 	var hint_str := "_read_hints_%d_%d" % [team_id, player_id]
@@ -97,16 +111,16 @@ func _load_hints_from_json(new_hints: Array) -> void:
 	on_hint_update.emit(hints)
 
 
-## Connects the specified `Callable[Array[NetworkHint]]->void` to be called every time
+## Connects the specified `Callable(Array[NetworkHint])->void` to be called every time
 ## hints are updated for this client. Will call immediately, if hints are already loaded;
 ## else will immediately call for hints to be loaded, which will trigger an update.
 func set_hint_notify(proc: Callable) -> void:
 	on_hint_update.connect(proc)
 	if _hint_listening: proc.call(hints)
-	else: install_hint_listener()
-## Sends a `SetNotify` packet, and connects the specified `Callable[Variant]->void`
+	else: _install_hint_listener()
+## Sends a `SetNotify` packet, and connects the specified `Callable(Variant)->void`
 ## to be called every time the specified `key` is updated on the server.
-func set_notify(key: String, proc: Callable) -> void: ##
+func set_notify(key: String, proc: Callable) -> void:
 	if not _notified_keys.has(key):
 		Archipelago.send_command("SetNotify", {"keys": [key]})
 		_notified_keys[key] = true
@@ -115,9 +129,9 @@ func set_notify(key: String, proc: Callable) -> void: ##
 			proc.call(json.get("value")))
 
 var _retrieve_queue: Dictionary[String, Array]
-## Sends a `Get` packet, and connects the specified `Callable[Variant]->void`
+## Sends a `Get` packet, and connects the specified `Callable(Variant)->void`
 ## to be called once when the result is retrieved
-func retrieve(key: String, proc: Callable) -> void: ## Callable[Variant]->void
+func retrieve(key: String, proc: Callable) -> void:
 	Archipelago.send_command("Get", {"keys": [key]})
 	if not _retrieve_queue.has(key):
 		_retrieve_queue[key] = [proc]
@@ -131,13 +145,12 @@ func _on_retrieve(json: Dictionary) -> void:
 
 ## Sends an `UpdateHint` packet, updating the status of an existing hint
 ## The hint is identified by `loc, plyr`, the location it is for and the player who is to find it
-## Only valid if the server is running a branch with https://github.com/ArchipelagoMW/Archipelago/pull/3506
 func update_hint(loc: int, plyr: int, status: NetworkHint.Status) -> void:
 	Archipelago.send_command("UpdateHint", {"location": loc, "player": plyr, "status": status})
 
 var _scout_cache: Dictionary[int, NetworkItem]
 var _scout_queue: Dictionary[int, Array]
-## Sends a `LocationScouts` packet, and connects the specified `Callable[NetworkItem]->void`
+## Sends a `LocationScouts` packet, and connects the specified `Callable(NetworkItem)->void`
 ## to be called with the returned information.
 ## If the location has already been scouted this session, returns the cached info.
 func scout(location: int, create_as_hint: int, proc: Callable) -> void:
