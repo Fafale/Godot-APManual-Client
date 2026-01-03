@@ -92,6 +92,10 @@ signal obtained_items(items: Array[NetworkItem]) ## Emitted for each item *packe
 signal refresh_items(items: Array[NetworkItem]) ## Emitted when the server re-sends ALL obtained items
 signal on_hint_update(hints: Array[NetworkHint]) ## Emitted when hints relevant to this client change
 
+## Emitted when a `Bounce` packet of type `TrapLink` is received, after the `bounce` signal.
+## 'trap_name' will be the trap name AFTER resolving the received name through `TRAP_LINK_ALIASES`.
+signal traplink(source: String, trap_name: String, json: Dictionary)
+
 signal all_scout_cached ## Emitted when a scout packet containing ALL locations is received (see `force_scout_all`)
 @warning_ignore_restore("unused_signal")
 # Outgoing server packets
@@ -203,3 +207,19 @@ func send_deathlink(cause: String = ""):
 	Archipelago.last_sent_deathlink_time = Time.get_unix_time_from_system()
 	cmd["data"]["time"] = Archipelago.last_sent_deathlink_time
 	send_bounce(cmd, [], [], ["DeathLink"])
+
+## Sends a `Bounce` packet designed for the `TrapLink` feature
+## Requires the client be connected with the `TrapLink` tag
+func send_traplink(trap_name: String):
+	if not Archipelago.is_traplink():
+		AP.log("Tried to send TrapLink while TrapLink is not enabled!")
+		return
+	if trap_name.is_empty():
+		AP.log("Tried to send TrapLink without a trap name!")
+		return
+	var cmd: Dictionary = {"data": {}}
+	cmd["data"]["trap_name"] = trap_name
+	cmd["data"]["source"] = get_player_name(-1, false)
+	Archipelago.last_sent_traplink_time = Time.get_unix_time_from_system()
+	cmd["data"]["time"] = Archipelago.last_sent_traplink_time
+	send_bounce(cmd, [], [], ["TrapLink"])
