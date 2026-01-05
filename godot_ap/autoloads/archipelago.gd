@@ -528,7 +528,7 @@ func _handle_command(json: Dictionary) -> void:
 			var tags: Array = json.get("tags", [])
 			if tags.has("DeathLink"):
 				var tstamp: float = json["data"].get("time", 0.0)
-				if is_equal_approx(tstamp, last_sent_deathlink_time):
+				if absf(tstamp - last_sent_deathlink_time) < 0.5:
 					return # Skip deaths from self
 				var source: String = json["data"].get("source", "")
 				var cause: String = json["data"].get("cause", "")
