@@ -412,7 +412,7 @@ func _handle_command(json: Dictionary) -> void:
 			SignalChooser.new().register_multiple(
 				[all_datapacks_loaded, disconnected],
 				[func():
-					send_command.bind("Connect",args)
+					send_command("Connect",args)
 					conn._load_locations(),
 					Util.nil])
 			_send_datapack_request()
