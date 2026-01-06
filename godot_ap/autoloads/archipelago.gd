@@ -533,7 +533,7 @@ func _handle_command(json: Dictionary) -> void:
 				conn.deathlink.emit(source, cause, json)
 			if tags.has("TrapLink"):
 				var tstamp: float = json["data"].get("time", 0.0)
-				if is_equal_approx(tstamp, last_sent_traplink_time):
+				if absf(tstamp - last_sent_traplink_time) < 0.5:
 					return # Skip traps from self
 				var source: String = json["data"].get("source", "")
 				var trap_name: String = json["data"].get("trap_name", "")
