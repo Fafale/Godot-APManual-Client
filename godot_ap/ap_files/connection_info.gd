@@ -22,9 +22,6 @@ var received_items: Array[NetworkItem] = []
 ## The hints for this slot. Only updated if [set_hint_notify] has been used.
 var hints: Array[NetworkHint] = []
 
-## Fires after `locations` and `locs_by_name` have been populated
-signal locations_loaded
-
 ## All locations, by ID
 var locations: Dictionary[int, APLocation] = {}
 ## All locations, by name
@@ -68,18 +65,15 @@ func get_location(locid: int) -> APLocation:
 func get_loc_by_name(loc_name: String) -> APLocation:
 	return locs_by_name.get(loc_name, APLocation.nil())
 
-## Loads (or reloads) all locations from the datapackage.
-## Emits the `locations_loaded` signal when complete.
+# Loads (or reloads) all locations from the datapackage.
 func _load_locations() -> void:
 	locations.clear()
 	locs_by_name.clear()
-	if Archipelago.datapack_pending:
-		await Archipelago.all_datapacks_loaded
+	assert(not Archipelago.datapack_pending) # should never be called before datapacks are loaded...
 	for locid in Archipelago.location_list():
 		var loc := APLocation.make(locid)
 		locations[locid] = loc
 		locs_by_name[loc.name] = loc
-	locations_loaded.emit()
 
 # Incoming server packets
 @warning_ignore_start("unused_signal")
