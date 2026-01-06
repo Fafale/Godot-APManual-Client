@@ -84,7 +84,7 @@ signal roomupdate(json: Dictionary) ## Emitted when a `RoomUpdate` packet is rec
 signal obtained_item(item: NetworkItem) ## Emitted for each item received
 signal obtained_items(items: Array[NetworkItem]) ## Emitted for each item *packet* received
 signal refresh_items(items: Array[NetworkItem]) ## Emitted when the server re-sends ALL obtained items
-signal on_hint_update(hints: Array[NetworkHint]) ## Emitted when hints relevant to this client change
+signal _on_hint_update(hints: Array[NetworkHint]) # Emitted when hints relevant to this client change, assuming `set_hint_notify()` has been called.
 
 ## Emitted when a `Bounce` packet of type `TrapLink` is received, after the `bounce` signal.
 ## 'trap_name' will be the trap name AFTER resolving the received name through `TRAP_LINK_ALIASES`.
@@ -106,14 +106,14 @@ func _load_hints_from_json(new_hints: Array) -> void:
 	for json in new_hints:
 		hints.append(NetworkHint.from(json))
 	hints.make_read_only()
-	on_hint_update.emit(hints)
+	_on_hint_update.emit(hints)
 
 
 ## Connects the specified `Callable(Array[NetworkHint])->void` to be called every time
 ## hints are updated for this client. Will call immediately, if hints are already loaded;
 ## else will immediately call for hints to be loaded, which will trigger an update.
 func set_hint_notify(proc: Callable) -> void:
-	on_hint_update.connect(proc)
+	_on_hint_update.connect(proc)
 	if _hint_listening: proc.call(hints)
 	else: _install_hint_listener()
 ## Sends a `SetNotify` packet, and connects the specified `Callable(Variant)->void`
