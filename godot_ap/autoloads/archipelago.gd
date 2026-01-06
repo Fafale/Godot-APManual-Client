@@ -411,10 +411,7 @@ func _handle_command(json: Dictionary) -> void:
 			roominfo.emit(conn, json)
 			SignalChooser.new().register_multiple(
 				[all_datapacks_loaded, disconnected],
-				[func():
-					send_command("Connect",args)
-					conn._load_locations(),
-					Util.nil])
+				[send_command.bind("Connect",args), Util.nil])
 			_send_datapack_request()
 		"ConnectionRefused":
 			var err_str := str(json["errors"])
@@ -476,6 +473,7 @@ func _handle_command(json: Dictionary) -> void:
 				await get_tree().create_timer(3).timeout
 				_printout_recieved_items = false
 
+			conn._load_locations()
 			connected.emit(conn, json)
 		"PrintJSON":
 			preparse_json(json)
