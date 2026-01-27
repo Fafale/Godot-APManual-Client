@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://bx4d5pih77vp4"]
+[gd_scene load_steps=11 format=3 uid="uid://bx4d5pih77vp4"]
 
 [ext_resource type="PackedScene" uid="uid://c51q4vrwhlcl7" path="res://godot_ap/ui/console_container.tscn" id="1_karta"]
 [ext_resource type="Script" uid="uid://cs0261v4jx4b" path="res://godot_ap/ui/slider_box.gd" id="2_t718y"]
@@ -6,10 +6,11 @@
 [ext_resource type="Script" uid="uid://cyc8jkqjagswj" path="res://godot_ap/ui/connect_box.gd" id="4_rlrcu"]
 [ext_resource type="FontVariation" uid="uid://by743jyixqnxb" path="res://godot_ap/ui/themes/symbols_font.tres" id="4_t718y"]
 [ext_resource type="Script" uid="uid://cety6nqnci3n6" path="res://godot_ap/ui/updown_lineedit.gd" id="5_dfvvx"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ksdsn"]
+[ext_resource type="Script" uid="uid://b5iliwi204xek" path="res://godot_ap/ui/game_select_button.gd" id="7_rlrcu"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1cnti"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ksdsn"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_8fs71"]
 font_size = 20
@@ -134,13 +135,36 @@ focus_previous = NodePath("../Port_Box")
 theme_override_font_sizes/font_size = 20
 script = ExtResource("5_dfvvx")
 
+[node name="Label4" type="Label" parent="ConnectBox/Row/Box/Margins/VBox/Content"]
+layout_mode = 2
+text = "Game:"
+horizontal_alignment = 2
+
+[node name="Game_Button" type="Button" parent="ConnectBox/Row/Box/Margins/VBox/Content"]
+custom_minimum_size = Vector2(200, 33)
+layout_mode = 2
+focus_neighbor_top = NodePath("../Slot_Box")
+focus_neighbor_bottom = NodePath("../Pwd_Box")
+focus_next = NodePath("../Pwd_Box")
+focus_previous = NodePath("../Slot_Box")
+theme_override_font_sizes/font_size = 20
+text = "None Selected"
+script = ExtResource("7_rlrcu")
+
+[node name="FileDialog" type="FileDialog" parent="ConnectBox/Row/Box/Margins/VBox/Content/Game_Button"]
+title = "Open a File"
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.apmanual")
+use_native_dialog = true
+
 [node name="HBox" type="HBoxContainer" parent="ConnectBox/Row/Box/Margins/VBox/Content"]
 layout_mode = 2
 
 [node name="ShowPwd" type="CheckBox" parent="ConnectBox/Row/Box/Margins/VBox/Content/HBox"]
 layout_mode = 2
-theme_override_styles/disabled = SubResource("StyleBoxEmpty_ksdsn")
 theme_override_styles/normal = SubResource("StyleBoxEmpty_1cnti")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_ksdsn")
 
 [node name="Label4" type="Label" parent="ConnectBox/Row/Box/Margins/VBox/Content/HBox"]
 layout_mode = 2
@@ -182,6 +206,7 @@ text = "Disconnect"
 [connection signal="text_submitted" from="ConnectBox/Row/Box/Margins/VBox/Content/IP_Box" to="ConnectBox/Row/Box/Margins/VBox/Content" method="try_connection" unbinds=1]
 [connection signal="text_submitted" from="ConnectBox/Row/Box/Margins/VBox/Content/Port_Box" to="ConnectBox/Row/Box/Margins/VBox/Content" method="try_connection" unbinds=1]
 [connection signal="text_submitted" from="ConnectBox/Row/Box/Margins/VBox/Content/Slot_Box" to="ConnectBox/Row/Box/Margins/VBox/Content" method="try_connection" unbinds=1]
+[connection signal="pressed" from="ConnectBox/Row/Box/Margins/VBox/Content/Game_Button" to="ConnectBox/Row/Box/Margins/VBox/Content/Game_Button" method="_on_pressed"]
 [connection signal="text_submitted" from="ConnectBox/Row/Box/Margins/VBox/Content/Pwd_Box" to="ConnectBox/Row/Box/Margins/VBox/Content" method="try_connection" unbinds=1]
 [connection signal="pressed" from="ConnectBox/Row/Box/Margins/VBox/ButtonRow/ConnectBtn" to="ConnectBox/Row/Box/Margins/VBox/Content" method="try_connection"]
 [connection signal="pressed" from="ConnectBox/Row/Box/Margins/VBox/ButtonRow/DisconnectBtn" to="ConnectBox/Row/Box/Margins/VBox/Content" method="kill_connection"]

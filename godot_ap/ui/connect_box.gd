@@ -3,6 +3,7 @@ extends GridContainer
 @onready var ipbox: LineEdit = $IP_Box
 @onready var portbox: LineEdit = $Port_Box
 @onready var slotbox: LineEdit = $Slot_Box
+@onready var gamebox: Button = $Game_Button
 @onready var pwdbox: LineEdit = $Pwd_Box
 @onready var errlbl: Label = $ErrorLabel
 
@@ -24,6 +25,7 @@ func update_connection(status: bool) -> void:
 	pwdbox.editable = not status
 func try_connection() -> void:
 	if Archipelago.is_not_connected():
+		Archipelago.update_game_name(gamebox.text)
 		Archipelago.ap_connect(ipbox.text, portbox.text, slotbox.text, pwdbox.text)
 		_connect_signals()
 

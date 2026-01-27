@@ -170,6 +170,13 @@ static var special_colors: Dictionary[SpecialColor, RichColor] = {
 	SpecialColor.DEBUG: RichColor.MAGENTA,
 }
 
+## Update the game name, to select current manual
+func update_game_name(s: String) -> void:
+	if s.begins_with("Manual_"):
+		AP_GAME_NAME = s
+	else:
+		push_error("Input game isn't a manual game")
+
 ## Checks if a string matches a RichColor
 static func is_rich_color_name(s: String) -> bool:
 	if s == "nil": return false
