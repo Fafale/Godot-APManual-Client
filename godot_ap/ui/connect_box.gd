@@ -24,10 +24,10 @@ func update_connection(status: bool) -> void:
 	slotbox.editable = not status
 	pwdbox.editable = not status
 func try_connection() -> void:
-	if Archipelago.is_not_connected():
-		Archipelago.update_game_name(gamebox.text)
-		Archipelago.ap_connect(ipbox.text, portbox.text, slotbox.text, pwdbox.text)
-		_connect_signals()
+	if not APManual.filepath.is_empty():
+		if Archipelago.is_not_connected():
+			Archipelago.ap_connect(ipbox.text, portbox.text, slotbox.text, pwdbox.text)
+			_connect_signals()
 
 func kill_connection() -> void:
 	Archipelago.ap_disconnect()
