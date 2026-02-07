@@ -1,0 +1,28 @@
+[gd_scene load_steps=2 format=3 uid="uid://cj52s0xm6fowq"]
+
+[ext_resource type="Script" uid="uid://csg613fgsgyc7" path="res://ap_manual/UI/Items/ui_category_item.gd" id="1_fv7k2"]
+
+[node name="UiCategoryItem" type="VBoxContainer"]
+custom_minimum_size = Vector2(240, 0)
+anchors_preset = -1
+anchor_right = 0.32
+anchor_bottom = 0.0925
+offset_right = -9.0
+script = ExtResource("1_fv7k2")
+metadata/_edit_use_anchors_ = true
+
+[node name="BtCategory" type="Button" parent="."]
+layout_mode = 2
+text = "Category Name"
+
+[node name="TextLabel" type="RichTextLabel" parent="."]
+layout_mode = 2
+bbcode_enabled = true
+text = "Item With Long Name 1
+Item 2
+Item 3
+Item 4
+Item 5"
+fit_content = true
+
+[connection signal="pressed" from="BtCategory" to="." method="_on_bt_category_pressed"]

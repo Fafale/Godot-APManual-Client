@@ -1,11 +1,16 @@
-[gd_scene load_steps=3 format=3 uid="uid://cn7ah7d3ep4de"]
+[gd_scene load_steps=4 format=3 uid="uid://cn7ah7d3ep4de"]
 
 [ext_resource type="PackedScene" uid="uid://cgq7n1figlpu3" path="res://godot_ap/ui/base_client.tscn" id="1_i5jgm"]
 [ext_resource type="PackedScene" uid="uid://dp2yir3r1061y" path="res://godot_ap/ui/settings_tab.tscn" id="3_4k5ff"]
+[ext_resource type="PackedScene" uid="uid://cscatil0nvwh5" path="res://ap_manual/UI/ManualClientTab.tscn" id="3_kwywh"]
 
 [node name="CommonClient" instance=ExtResource("1_i5jgm")]
 
-[node name="Settings" parent="Tabs" index="3" instance=ExtResource("3_4k5ff")]
+[node name="Manual Client" parent="Tabs" index="3" instance=ExtResource("3_kwywh")]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 2
+
+[node name="Settings" parent="Tabs" index="4" instance=ExtResource("3_4k5ff")]
+visible = false
+layout_mode = 2

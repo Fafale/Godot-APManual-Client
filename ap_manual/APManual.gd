@@ -7,11 +7,14 @@ enum types {
 	ZIPPEDFULL = 2
 }
 
+signal finished_receiving_data
+
 @onready var game_name: String = ""
 @onready var json_items: Dictionary = {}
 @onready var json_locations: Dictionary = {}
 @onready var json_categories: Dictionary = {}
 @onready var json_regions: Dictionary = {}
+
 
 @onready var filetype: types = types.UNDEFINED
 @onready var filepath: String = ""
@@ -21,7 +24,12 @@ enum types {
 @onready var item_categories: Dictionary[String, bool] = {}
 @onready var location_categories: Dictionary[String, bool] = {}
 
+# Received items
+@onready var inventory: Dictionary[String, ManualItem] = {}
+
+# Available items/locations
 @onready var items: Dictionary[String, ManualItem] = {}
+@onready var items_id_to_string: Dictionary[int, String] = {}
 @onready var locations: Dictionary[String, ManualLocation] = {}
 
 func _ready() -> void:
@@ -72,11 +80,16 @@ func set_basic_manual_info() -> String:
 	Archipelago.update_game_name(game_name)
 	return game_name
 
-func read_apmanual_info(conn: ConnectionInfo, json: Dictionary):
+func read_apmanual_info(conn: ConnectionInfo, _json: Dictionary):
+	conn.refresh_items.connect(receive_items)
+	
 	for item_dict:Dictionary in json_items.values():
 		var item_name: String = item_dict["name"]
 		var item: ManualItem = create_item(item_name, item_dict["id"])
 		items[item_name] = item
+		
+		var item_id = int(item_dict["id"])
+		items_id_to_string[item_id] = item_name
 		
 		var curr_categories: Array = item_dict.get("category", [])
 		for category_name: String in curr_categories:
@@ -110,6 +123,21 @@ func read_apmanual_info(conn: ConnectionInfo, json: Dictionary):
 				cat.locations[loc_name] = loc
 				location_categories[category_name] = true
 		
+
+# Load/Read received items from server, and save their count at inventory/item variables
+func receive_items(received_items: Array[NetworkItem]) -> void:
+	# Wait a bit to make sure the dictionaries have been created
+	await get_tree().create_timer(1.0).timeout
+	
+	for net_item:NetworkItem in received_items:
+		var item_name = items_id_to_string[net_item.id]
+		var item = items[item_name]
+		item.count += 1
+		
+		inventory[item_name] = item
+		
+	
+	finished_receiving_data.emit()
 
 # Clear/Empty the json variables, for when changing .apmanuals before connecting
 func clear_jsons() -> void:

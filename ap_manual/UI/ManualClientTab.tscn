@@ -1,0 +1,40 @@
+[gd_scene load_steps=2 format=3 uid="uid://cscatil0nvwh5"]
+
+[ext_resource type="Script" uid="uid://cswl10xxf2dtd" path="res://ap_manual/UI/manual_client_tab.gd" id="1_bsgnn"]
+
+[node name="ManualClient" type="MarginContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_bsgnn")
+
+[node name="Tabs" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="ItemsScroll" type="ScrollContainer" parent="Tabs"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="Items" type="VBoxContainer" parent="Tabs/ItemsScroll"]
+layout_mode = 2
+
+[node name="LabelTitle" type="Label" parent="Tabs/ItemsScroll/Items"]
+layout_mode = 2
+text = "ITEMS"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LocationsScroll" type="ScrollContainer" parent="Tabs"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="Locations" type="VBoxContainer" parent="Tabs/LocationsScroll"]
+layout_mode = 2
+
+[node name="LabelTitle" type="Label" parent="Tabs/LocationsScroll/Locations"]
+layout_mode = 2
+text = "LOCATIONS"
+horizontal_alignment = 1
+vertical_alignment = 1
